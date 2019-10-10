@@ -1,5 +1,5 @@
 FROM sxc654/docker-composer:php7.1
-RUN apk add \
+RUN apk update && apk add --no-cache \
     libressl-dev \
     imap-dev \
     && docker-php-ext-configure imap --with-imap --with-imap-ssl \
