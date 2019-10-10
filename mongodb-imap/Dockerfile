@@ -1,4 +1,4 @@
-FROM sxc654/docker-composer:php7.1
+FROM sxc654/docker-composer:mongodb
 RUN apk update && apk add --no-cache \
     libressl-dev \
     imap-dev \
