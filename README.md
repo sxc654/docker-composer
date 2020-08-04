@@ -1,3 +1,3 @@
 # docker-composer
 
-dockerhub 自动构建
+dockerhub 自动构建镜像

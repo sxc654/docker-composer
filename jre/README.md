@@ -1,3 +1,3 @@
 # docker-composer
 
-jre1.8环境
+maven 自动化打包环境
