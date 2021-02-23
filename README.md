@@ -1,3 +1,3 @@
 # docker-php
 
-docker-composer PHP基础镜像
+docker下PHP基础镜像

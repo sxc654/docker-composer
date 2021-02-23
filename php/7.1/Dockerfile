@@ -1,7 +1,14 @@
-FROM php:7.2-fpm-alpine
+FROM php:7.1-fpm-alpine
+
+#******************更换Alpine源为mirrors.ustc.edu.cn******************
+RUN echo http://mirrors.ustc.edu.cn/alpine/latest-stable/main > /etc/apk/repositories && \
+    echo http://mirrors.ustc.edu.cn/alpine/latest-stable/community >> /etc/apk/repositories
+
 RUN apk update \
     && apk add --no-cache git mysql-client curl libmcrypt libmcrypt-dev openssh-client rsync icu-dev \
-    libxml2-dev freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev g++ make autoconf supervisor \
+    libxml2-dev freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev g++ make autoconf supervisor tzdata \
+    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
@@ -18,7 +25,8 @@ RUN apk update \
     --with-png-dir=/usr/include/ \
     --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd  \
-    && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev  \
-    && docker-php-ext-install opcache && docker-php-ext-enable opcache \
-    && curl -sS https://getcomposer.org/installer | php \
+    && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev tzdata \
+    && docker-php-ext-install opcache && docker-php-ext-enable opcache
+
+RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
