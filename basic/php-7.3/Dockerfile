@@ -12,10 +12,11 @@ RUN apk update \
 
 RUN apk update \
     && apk add --no-cache vim git g++ make rsync curl autoconf supervisor openssh-client mysql-client\
-    icu-dev libxml2-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
+    icu-dev libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
     && docker-php-source extract \
     && pecl install xdebug-2.7.0 \
-    && docker-php-ext-enable xdebug \
+    && pecl install mongodb \
+    && docker-php-ext-enable xdebug mongodb \
     && docker-php-source delete \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
@@ -33,7 +34,7 @@ RUN apk update \
     --with-freetype-dir=/usr/include/ \
     && docker-php-ext-install gd \
     && docker-php-ext-install opcache && docker-php-ext-enable opcache \
-    && apk del --no-cache libxml2-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev
+    && apk del --no-cache libxml2-dev libressl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev
 
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php \
