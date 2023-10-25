@@ -1,15 +1,18 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.1-fpm-alpine
 
 #******************更换Alpine源为mirrors.ustc.edu.cn******************
 RUN echo http://mirrors.ustc.edu.cn/alpine/latest-stable/main > /etc/apk/repositories && \
     echo http://mirrors.ustc.edu.cn/alpine/latest-stable/community >> /etc/apk/repositories
 
-#******************安装必要插件******************
+# localtime
+RUN apk update \
+    && apk add --no-cache tzdata \
+    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone 
+
 RUN apk update \
     && apk add --no-cache git mysql-client curl libmcrypt libmcrypt-dev openssh-client rsync icu-dev \
-    libxml2-dev freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev g++ make autoconf supervisor tzdata \
-    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
+    libxml2-dev freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev g++ make autoconf supervisor \
     && docker-php-source extract \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
