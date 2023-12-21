@@ -13,7 +13,7 @@ RUN apk update \
 # Install various PHP extensions
 RUN apk update \
     && apk add --no-cache vim git g++ make rsync curl autoconf supervisor openssh-client mysql-client\
-    icu-dev libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
+    icu-dev icu-libs libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
     oniguruma oniguruma-dev rabbitmq-c rabbitmq-c-dev \
     && docker-php-source extract \
     && pecl install xdebug-2.8.0 mongodb-1.16.1 amqp \
@@ -28,8 +28,9 @@ RUN apk update \
     && docker-php-ext-configure gd \
     --with-jpeg=/usr/include/ \
     --with-freetype=/usr/include/ \
-    && docker-php-ext-configure pcntl --enable-pcntl \
     && docker-php-ext-install gd \
+    && docker-php-ext-configure pcntl --enable-pcntl \
+    && docker-php-ext-install pcntl \
     && docker-php-ext-install opcache \
     && docker-php-ext-enable opcache \
     && apk del --no-cache libxml2-dev libressl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev

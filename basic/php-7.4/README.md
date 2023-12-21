@@ -1,3 +1,3 @@
 # docker-composer
 
-alpine下的php7.3基本环境 (中国时区)
+alpine下的php7.4基本环境 (中国时区)
