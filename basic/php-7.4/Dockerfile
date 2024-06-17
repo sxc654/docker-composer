@@ -12,7 +12,7 @@ RUN apk update \
 
 # Install various PHP extensions
 RUN apk update \
-    && apk add --no-cache vim git g++ make rsync curl autoconf supervisor openssh-client mysql-client\
+    && apk add --no-cache vim git g++ make rsync curl autoconf supervisor gcompat openssh-client mysql-client\
     icu-dev icu-libs libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
     oniguruma oniguruma-dev rabbitmq-c rabbitmq-c-dev \
     && docker-php-source extract \
