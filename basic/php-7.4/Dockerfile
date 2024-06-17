@@ -24,7 +24,7 @@ RUN apk update \
     && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && docker-php-ext-install soap pdo_mysql intl mbstring zip\
+    && docker-php-ext-install soap pdo_mysql mbstring zip\
     && docker-php-ext-configure gd \
     --with-jpeg=/usr/include/ \
     --with-freetype=/usr/include/ \
