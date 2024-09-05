@@ -10,30 +10,31 @@ RUN apk update \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone 
 
+# Install various PHP extensions
 RUN apk update \
-    && apk add --no-cache vim git g++ make rsync curl autoconf supervisor openssh-client mysql-client\
-    icu-dev libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
+    && apk add --no-cache vim git g++ make rsync curl autoconf supervisor gcompat openssh-client mysql-client\
+    icu-dev icu-libs libxml2-dev libressl libressl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
+    oniguruma oniguruma-dev rabbitmq-c rabbitmq-c-dev \
     && docker-php-source extract \
-    && pecl install xdebug-2.7.0 \
-    && pecl install mongodb \
-    && docker-php-ext-enable xdebug mongodb \
+    && pecl install xdebug-2.7.2 mongodb-1.16.0 amqp-1.11.0 \
+    && docker-php-ext-enable xdebug mongodb amqp \
     && docker-php-source delete \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && docker-php-ext-install soap pdo_mysql intl mbstring \
-    && docker-php-ext-configure zip \
-    --with-libzip=/usr/include/ \
-    && docker-php-ext-install zip \
+    && docker-php-ext-install soap pdo_mysql mbstring zip\
     && docker-php-ext-configure gd \
     --with-gd \
     --with-png-dir=/usr/include/ \
     --with-jpeg-dir=/usr/include/ \
     --with-freetype-dir=/usr/include/ \
     && docker-php-ext-install gd \
-    && docker-php-ext-install opcache && docker-php-ext-enable opcache \
+    && docker-php-ext-configure pcntl --enable-pcntl \
+    && docker-php-ext-install pcntl \
+    && docker-php-ext-install opcache \
+    && docker-php-ext-enable opcache \
     && apk del --no-cache libxml2-dev libressl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev
 
 # Composer
