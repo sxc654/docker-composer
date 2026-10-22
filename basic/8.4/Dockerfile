@@ -1,6 +1,6 @@
 # docker-php 基础镜像 php-8.4
 #
-# 基于 php:8.4-fpm-alpine3.24，扩展集与 basic/php-7.4 保持一致
+# 基于 php:8.4-fpm-alpine3.24，扩展集与 basic/7.4 保持一致
 # （xdebug + mongodb + amqp + imagick + soap/pdo_mysql/mysqli/mbstring/zip/
 #   bcmath/exif/intl/gd/pcntl/opcache）。
 # PHP 8.x 的 xdebug 必须用 3.x（7.4 用的 2.8.0 不支持 8.x），ini 配置也随之换成
@@ -62,30 +62,12 @@ RUN --mount=type=bind,source=vendor/pie.phar,target=/tmp/pie.phar,ro \
     && apk del .build-deps
 
 # 构建期自检：PIE 启用扩展是 best-effort（启用失败只 warn 不中断构建），故在此逐项断言；
-# 缺扩展 / xdebug 配置未生效 / 时区不是 Asia/Shanghai 时，任一项失败即中断构建
-RUN php -r '$required = [ \
-        "xdebug", "mongodb", "amqp", "imagick", \
-        "soap", "pdo_mysql", "mysqli", "mbstring", \
-        "zip", "bcmath", "exif", "intl", "gd", "pcntl", "Zend OPcache", \
-    ]; \
+RUN php -r '$required = ["xdebug","mongodb","amqp","imagick","soap","pdo_mysql","mysqli","mbstring","zip","bcmath","exif","intl","gd","pcntl","Zend OPcache"]; \
     $missing = []; \
-    foreach ($required as $ext) { \
-        if (! extension_loaded($ext)) { \
-            $missing[] = $ext; \
-        } \
-    } \
-    if ($missing) { \
-        fwrite(STDERR, "missing extension: " . implode(", ", $missing) . PHP_EOL); \
-        exit(1); \
-    } \
-    if (ini_get("xdebug.mode") !== "debug" || ini_get("xdebug.client_port") !== "9005") { \
-        fwrite(STDERR, "xdebug ini not applied" . PHP_EOL); \
-        exit(1); \
-    } \
-    if (date_default_timezone_get() !== "Asia/Shanghai") { \
-        fwrite(STDERR, "date.timezone not applied: " . date_default_timezone_get() . PHP_EOL); \
-        exit(1); \
-    } \
+    foreach ($required as $m) { if (!extension_loaded($m)) { $missing[] = $m; } } \
+    if ($missing) { fwrite(STDERR, "missing extension: " . implode(", ", $missing) . PHP_EOL); exit(1); } \
+    if (ini_get("xdebug.mode") !== "debug" || ini_get("xdebug.client_port") !== "9005") { fwrite(STDERR, "xdebug ini not applied" . PHP_EOL); exit(1); } \
+    if (date_default_timezone_get() !== "Asia/Shanghai") { fwrite(STDERR, "date.timezone not applied: " . date_default_timezone_get() . PHP_EOL); exit(1); } \
     echo "extensions + xdebug ini OK" . PHP_EOL;'
 
 # Composer

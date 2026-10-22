@@ -4,8 +4,8 @@ alpine 下的 php 8.4 fpm 基础环境（中国时区）。
 
 - 基础：`php:8.4-fpm-alpine3.24`（官方镜像，浮动 tag，跟随官方 8.4.x 更新）
 - 扩展安装：**PIE**（`php pie.phar install`，PHP 官方继任安装器；pecl 频道 REST 已弃用）
-  - `pie.phar`（PIE 1.5.3）vendor 在构建上下文 `basic/php-8.4/vendor/pie.phar`，
-    Dockerfile 以 `COPY vendor/pie.phar` 取用，仅构建期存在
+  - `pie.phar`（PIE 1.5.3）vendor 在构建上下文 `basic/8.4/vendor/pie.phar`，
+    Dockerfile 以 `RUN --mount=type=bind,source=vendor/pie.phar` 取用，仅构建期存在
 - 第三方扩展（PIE，pin 版本）：`xdebug 3.5.3`、`mongodb 2.5.5`、`amqp 2.2.0`、`imagick 3.8.1`
 - 官方扩展（`docker-php-ext-install`）：
   `soap` `pdo_mysql` `mysqli` `zip` `bcmath` `exif` `intl` `gd`(jpeg+freetype) `pcntl` `opcache`

@@ -27,8 +27,8 @@ jobs:
       - name: Build and push php-7.4
         uses: docker/build-push-action@v7
         with:
-          context: ./basic/php-7.4
-          file: ./basic/php-7.4/Dockerfile # 显式指定 Dockerfile 的位置
+          context: ./basic/7.4
+          file: ./basic/7.4/Dockerfile # 显式指定 Dockerfile 的位置
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:7.4
@@ -55,8 +55,8 @@ jobs:
       - name: Build and push php-8.4
         uses: docker/build-push-action@v7
         with:
-          context: ./basic/php-8.4
-          file: ./basic/php-8.4/Dockerfile
+          context: ./basic/8.4
+          file: ./basic/8.4/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:8.4

@@ -28,7 +28,7 @@ PHP 7.4 已 EOL，官方安全团队为 7.4 分支发布了最小源码 backport
 ## 构建
 
 ```bash
-cd basic/php-7.4
+cd basic/7.4
 docker build -t sxc654/docker-php:7.4-cve-fix .
 ```
 
