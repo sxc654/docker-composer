@@ -92,6 +92,9 @@ RUN set -eux; \
     make clean; \
     docker-php-source delete; \
     apk del .php-rebuild-deps; \
+    # 更新 pecl 频道元数据(官方镜像同款, docker-library/php#443), 否则老协议下 mongodb 等包会 "does not have REST xml available"
+    pecl update-channels; \
+    rm -rf /tmp/pear ~/.pearrc; \
     # 编译后冒烟测试
     php --version; \
     php -m
