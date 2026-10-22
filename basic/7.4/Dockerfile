@@ -110,7 +110,8 @@ RUN apk update \
     && apk add --no-cache \
         vim git rsync curl supervisor gcompat openssh-client mysql-client \
         icu-libs libxml2 openssl freetype libzip libpng libjpeg-turbo \
-        oniguruma rabbitmq-c imagemagick \
+        oniguruma rabbitmq-c imagemagick libgomp \
+        # libgomp：imagick.so（OpenMP）的运行期依赖，构建期随工具链安装，必须显式保留
     && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS autoconf libtool linux-headers \
         icu-dev libxml2-dev openssl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev \
