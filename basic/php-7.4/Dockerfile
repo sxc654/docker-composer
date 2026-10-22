@@ -92,9 +92,6 @@ RUN set -eux; \
     make clean; \
     docker-php-source delete; \
     apk del .php-rebuild-deps; \
-    # 更新 pecl 频道元数据(官方镜像同款, docker-library/php#443), 否则老协议下 mongodb 等包会 "does not have REST xml available"
-    pecl update-channels; \
-    rm -rf /tmp/pear ~/.pearrc; \
     # 编译后冒烟测试
     php --version; \
     php -m
@@ -112,7 +109,11 @@ RUN apk update \
     icu-dev icu-libs libxml2-dev openssl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
     oniguruma oniguruma-dev rabbitmq-c rabbitmq-c-dev \
     && docker-php-source extract \
-    && pecl install xdebug-2.8.0 mongodb-1.16.1 amqp \
+    && (pecl channel-discover pecl.php.net || pecl channel-update pecl.php.net) \
+    && curl -fsSLo /tmp/xdebug-2.8.0.tgz https://pecl.php.net/get/xdebug-2.8.0 \
+    && curl -fsSLo /tmp/mongodb-1.16.1.tgz https://pecl.php.net/get/mongodb-1.16.1 \
+    && curl -fsSLo /tmp/amqp.tgz https://pecl.php.net/get/amqp \
+    && pecl install /tmp/xdebug-2.8.0.tgz /tmp/mongodb-1.16.1.tgz /tmp/amqp.tgz \
     && docker-php-ext-enable xdebug mongodb amqp \
     && docker-php-source delete \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
