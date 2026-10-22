@@ -51,9 +51,9 @@ RUN set -eux; \
     # 断言补丁关键改动已进入源码
     grep -q 'zend_mm_safe_error_ex' Zend/zend_alloc.c; \
     grep -q 'zend_new_array_singleton' Zend/zend_API.h; \
-    # 官方镜像同款：musl iconv 不完整，链接 gnu-libiconv
+    # 官方镜像同款：musl iconv 不完整，链接 gnu-libiconv（基础镜像里已有旧链接，-f 覆盖）
     rm -fv /usr/include/iconv.h; \
-    ln -sv /usr/include/gnu-libiconv/*.h /usr/include/; \
+    ln -svf /usr/include/gnu-libiconv/*.h /usr/include/; \
     export CFLAGS="$PHP_CFLAGS" CPPFLAGS="$PHP_CPPFLAGS" LDFLAGS="$PHP_LDFLAGS"; \
     gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
     ./configure \
