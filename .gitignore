@@ -17,7 +17,9 @@ gen_code
 rebel.xml
 
 ### github ###
-.github/
+# GitHub Actions 工作流需随仓库提交
+.github/*
+!.github/workflows/
 
 ### NetBeans ###
 nbproject/private/
