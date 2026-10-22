@@ -41,7 +41,7 @@ COPY patches/php-7.4-CVE-2026-109618-109619.patch /usr/src/
 RUN set -eux; \
     apk add --no-cache --virtual .php-rebuild-deps \
         autoconf dpkg-dev dpkg file g++ gcc libc-dev make pkgconf re2c \
-        coreutils curl-dev gnu-libiconv-dev libsodium-dev libxml2-dev \
+        coreutils argon2-dev curl-dev gnu-libiconv-dev libsodium-dev libxml2-dev \
         linux-headers oniguruma-dev openssl-dev readline-dev sqlite-dev \
         patch; \
     docker-php-source extract; \
