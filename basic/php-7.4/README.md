@@ -19,6 +19,11 @@ PHP 7.4 已 EOL，官方安全团队为 7.4 分支发布了最小源码 backport
 3. 按官方同款 configure 参数原位重编译 PHP，扩展与工具链保持不变。
 4. `conf.d/zz-security-php2shell.ini` 设 `session.upload_progress.enabled = 0`
    作为纵深防御（补丁已代码级禁用，此为兜底）。
+5. `conf.d/zz-timezone.ini` 设 `date.timezone = Asia/Shanghai`（PHP 不读
+   `/etc/localtime`，必须显式设 ini 才能得到正确的 PHP 侧时区；与 8.4 对齐）。
+6. 扩展安装与 8.4 同一套扩展集（xdebug 2.8.0 / mongodb 1.16.1 / amqp / imagick 3.8.1
+   经 pecl 安装），构建尾声 `php -r` 自检：16 项扩展已加载 + xdebug remote ini
+   生效 + PHP 时区为 Asia/Shanghai，缺任一项构建直接失败。
 
 ## 构建
 

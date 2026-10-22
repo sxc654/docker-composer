@@ -25,11 +25,12 @@ FROM php:7.4-fpm-alpine3.16
 RUN echo http://mirrors.ustc.edu.cn/alpine/v3.16/main > /etc/apk/repositories \
     && echo http://mirrors.ustc.edu.cn/alpine/v3.16/community >> /etc/apk/repositories
 
-# localtime
+# localtime（系统时区 + PHP 侧 date.timezone；PHP 不读 /etc/localtime，必须显式设置 ini）
 RUN apk update \
     && apk add --no-cache tzdata \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone 
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && echo "date.timezone=Asia/Shanghai" > /usr/local/etc/php/conf.d/zz-timezone.ini
 
 #*****************************************************************************
 # 应用官方安全补丁并原位重编译 PHP 7.4.33
@@ -103,25 +104,34 @@ RUN set -eux; \
 RUN printf 'session.upload_progress.enabled = 0\n' \
     > /usr/local/etc/php/conf.d/zz-security-php2shell.ini
 
-# Install various PHP extensions
+# Install various PHP extensions（WordPress 官方托管手册推荐扩展集 + 调试/业务扩展）
+# 编译工具与 -dev 库放进 --virtual .build-deps（官方基础镜像不含工具链），编译完连同卸载
 RUN apk update \
-    && apk add --no-cache vim git g++ make rsync curl autoconf supervisor gcompat openssh-client mysql-client \
-    icu-dev icu-libs libxml2-dev openssl-dev freetype freetype-dev libzip libzip-dev libpng libpng-dev libjpeg-turbo libjpeg-turbo-dev \
-    oniguruma oniguruma-dev rabbitmq-c rabbitmq-c-dev \
+    && apk add --no-cache \
+        vim git rsync curl supervisor gcompat openssh-client mysql-client \
+        icu-libs libxml2 openssl freetype libzip libpng libjpeg-turbo \
+        oniguruma rabbitmq-c imagemagick \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS autoconf libtool linux-headers \
+        icu-dev libxml2-dev openssl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev \
+        oniguruma-dev rabbitmq-c-dev imagemagick-dev \
     && docker-php-source extract \
-    && (pecl channel-discover pecl.php.net || pecl channel-update pecl.php.net) \
+    # tgz 均为 curl 直连本地安装，无需 pecl 频道（channel-update 的 REST XML 已解析失败）
     && curl -fsSLo /tmp/xdebug-2.8.0.tgz https://pecl.php.net/get/xdebug-2.8.0 \
     && curl -fsSLo /tmp/mongodb-1.16.1.tgz https://pecl.php.net/get/mongodb-1.16.1 \
     && curl -fsSLo /tmp/amqp.tgz https://pecl.php.net/get/amqp \
-    && pecl install /tmp/xdebug-2.8.0.tgz /tmp/mongodb-1.16.1.tgz /tmp/amqp.tgz \
-    && docker-php-ext-enable xdebug mongodb amqp \
+    && curl -fsSLo /tmp/imagick-3.8.1.tgz https://pecl.php.net/get/imagick-3.8.1 \
+    && pecl install /tmp/xdebug-2.8.0.tgz /tmp/mongodb-1.16.1.tgz /tmp/amqp.tgz /tmp/imagick-3.8.1.tgz \
+    && rm -f /tmp/xdebug-*.tgz /tmp/mongodb-*.tgz /tmp/amqp-*.tgz /tmp/imagick-*.tgz \
+    && docker-php-ext-enable xdebug mongodb amqp imagick \
     && docker-php-source delete \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && docker-php-ext-install soap pdo_mysql mbstring zip\
+    # mysqli/exif/intl/bcmath 为 WordPress 官方托管手册要求的扩展（intl 需 icu-dev，已装）
+    && docker-php-ext-install soap pdo_mysql mysqli mbstring zip bcmath exif intl \
     && docker-php-ext-configure gd \
     --with-jpeg=/usr/include/ \
     --with-freetype=/usr/include/ \
@@ -130,7 +140,16 @@ RUN apk update \
     && docker-php-ext-install pcntl \
     && docker-php-ext-install opcache \
     && docker-php-ext-enable opcache \
-    && apk del --no-cache libxml2-dev openssl-dev freetype-dev libzip-dev libpng-dev libjpeg-turbo-dev
+    && apk del .build-deps
+
+# 构建期完整性自检（pecl 启用扩展 best-effort，缺任一项在此直接构建失败）
+RUN php -r '$required = ["xdebug","mongodb","amqp","imagick","soap","pdo_mysql","mysqli","mbstring","zip","bcmath","exif","intl","gd","pcntl","sodium","Zend OPcache"]; \
+    $missing = []; \
+    foreach ($required as $m) { if (!extension_loaded($m)) { $missing[] = $m; } } \
+    if ($missing) { fwrite(STDERR, "missing extension: " . implode(", ", $missing) . PHP_EOL); exit(1); } \
+    if (ini_get("xdebug.remote_enable") !== "1" || ini_get("xdebug.remote_port") !== "9000") { fwrite(STDERR, "xdebug ini not applied" . PHP_EOL); exit(1); } \
+    if (date_default_timezone_get() !== "Asia/Shanghai") { fwrite(STDERR, "date.timezone not applied: " . date_default_timezone_get() . PHP_EOL); exit(1); } \
+    echo "extensions + xdebug ini OK" . PHP_EOL;'
 
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php \
