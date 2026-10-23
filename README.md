@@ -2,7 +2,7 @@
 
 dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个子目录 = 一个镜像家族**，
 家族内**一个版本子目录 = 一个可独立构建的镜像**。新增镜像家族（或给现有家族加新版本）
-只需新建子目录 + 加一段 workflow job，不再开新仓库。
+只需新建子目录（workflow 自动发现，零改动），不再开新仓库。
 
 ## 约定
 
@@ -14,10 +14,12 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 ```
 
 - 构建上下文即版本子目录本身，`docker build -t <tag> <版本子目录>` 从不依赖仓库内其他路径
-- Docker Hub tag：沿用各自家族原有命名（`sxc654/docker-php:*`、`sxc654/docker-alpine:*`…），
-  下游 `FROM` 不因仓库归拢而变动
-- CI：`.github/workflows/docker-image.yml` 内**每个版本一个 job**（buildx + GHA 缓存并行），
-  新增版本/家族时同步加 job；Docker Hub Secrets 复用 `DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`
+- Docker Hub tag：由约定推导为 `sxc654/docker-<家族名>:<版本名>`（php→`docker-php:7.4`，
+  alpine→`docker-alpine:3.24`），下游 `FROM` 不因仓库归拢而变动
+- CI：`.github/workflows/docker-image.yml` **setup job 自动扫描**所有 `<家族>/<版本>/Dockerfile`
+  生成构建矩阵，每版本一个并行 job（buildx + GHA 缓存）——**新增家族/版本 workflow 零改动**；
+  Docker Hub Secrets 复用 `DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`
+  （tag 规则即上述约定；不守约定或多 tag 特例时再考虑引入 manifest 逃生门）
 
 ## 当前成员
 
@@ -31,9 +33,9 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 ## 快速上手（新增一个镜像家族）
 
 1. 建子目录 `<家族名>/<版本>/Dockerfile`（可选 `README.md`、`vendor/` 等）
-2. 在 `docker-image.yml` 复制一份 job：改 context/file/tags 三行
-3. 根 README 本表和对应家族 README 加一行
-4. 构建期自检建议保留在 Dockerfile 里（缺扩展/缺工具/时区错即失败，参考现有家族写法）
+2. workflow **无需改动**——push 后 setup 自动发现该目录并按 matrix 构建
+   （tag 自动推导为 `docker-<家族名>:<版本>`），仅需根 README 本表和对应家族 README 加一行
+3. 构建期自检建议保留在 Dockerfile 里（缺扩展/缺工具/时区错即失败，参考现有家族写法）
 
 ## 本地构建
 

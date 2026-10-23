@@ -1,5 +1,11 @@
 name: Build and Push to DockerHub
 
+# 动态发现构建矩阵
+# 约定：<家族名>/<版本名>/Dockerfile 即一个构建上下文，
+#       推送 tags 推导为 <DOCKERHUB_USERNAME>/docker-<家族名>:<版本名>。
+# 新增镜像家族/版本 = 建目录 + git push，workflow 零改动；
+# tag 不守约定或需多 tag 的特例，再引入 manifest 逃生门（当前未启用）。
+
 on:
   push:
     branches:
@@ -7,9 +13,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  # php-7.4 基础镜像（含 CVE-2026-109618/109619 官方安全补丁重编译）
-  build-and-push-php-74:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Discover <家族>/<版本> 构建上下文
+        id: discover
+        run: |
+          entries=$(find . -mindepth 3 -maxdepth 3 -name Dockerfile \
+            | sed 's|^\./||; s|/Dockerfile$||' \
+            | jq -Rnc '[inputs | split("/") | {family: .[0], version: .[1]}]')
+          echo "entries=$entries"
+          if [ -z "$entries" -o "$entries" = "[]" ]; then
+            echo "::error::no <family>/<version>/Dockerfile found"; exit 1
+          fi
+          echo "matrix=$(jq -nc --argjson e "$entries" '{include: $e}')" >> $GITHUB_OUTPUT
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -24,68 +53,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push php-7.4
+      - name: Build and push ${{ matrix.family }}:${{ matrix.version }}
         uses: docker/build-push-action@v7
         with:
-          context: ./php/7.4
-          file: ./php/7.4/Dockerfile # 显式指定 Dockerfile 的位置
+          context: ./${{ matrix.family }}/${{ matrix.version }}
+          file: ./${{ matrix.family }}/${{ matrix.version }}/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:7.4
+            ${{ secrets.DOCKERHUB_USERNAME }}/docker-${{ matrix.family }}:${{ matrix.version }}
           # 开启 GitHub Actions 的自带缓存，让后续的构建速度飞起来
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # php-8.5 基础镜像（官方版本自身不受 CVE-2026-109618/109619 影响）
-  build-and-push-php-85:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push php-8.5
-        uses: docker/build-push-action@v7
-        with:
-          context: ./php/8.5
-          file: ./php/8.5/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:8.5
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # alpine CI 部署镜像（openssh-client + rsync + git + bash → 独立 hub 仓库）
-  build-and-push-alpine:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push alpine
-        uses: docker/build-push-action@v7
-        with:
-          context: ./alpine/3.24
-          file: ./alpine/3.24/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/docker-alpine:3.24
           cache-from: type=gha
           cache-to: type=gha,mode=max
