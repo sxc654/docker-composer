@@ -15,7 +15,8 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 
 - 构建上下文即版本子目录本身，`docker build -t <tag> <版本子目录>` 从不依赖仓库内其他路径
 - Docker Hub tag：由约定推导为 `sxc654/docker-<家族名>:<版本名>`（php→`docker-php:7.4`，
-  alpine→`docker-alpine:3.24`），下游 `FROM` 不因仓库归拢而变动
+  alpine→`docker-alpine:3.24`，node→`docker-node:18` / `:22` / `:nvm`），
+  下游 `FROM` 不因仓库归拢而变动
 - CI：`.github/workflows/docker-image.yml` **setup job 自动扫描**所有 `<家族>/<版本>/Dockerfile`
   生成构建矩阵，每版本一个并行 job（buildx + GHA 缓存）——**新增家族/版本 workflow 零改动**；
   Docker Hub Secrets 复用 `DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`
@@ -27,6 +28,7 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 |---|---|---|
 | [`php/`](php/README.md) | PHP 基础镜像（alpine + fpm，中国时区，CVE 补丁） | `docker-php:7.4` `:8.5` |
 | [`alpine/`](alpine/README.md) | GitLab CI 部署镜像（openssh-client + rsync + git + bash） | `docker-alpine:3.24` |
+| [`node/`](node/README.md) | node 基础环境（版本：18 alpine / 22 slim；变体：nvm 多版本切换） | `docker-node:18` `:22` `:nvm` |
 
 *（此表随成员增减维护，新家族加一行即可）*
 
@@ -43,6 +45,9 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 cd php/7.4 && docker build -t sxc654/docker-php:7.4 .
 cd php/8.5 && docker build -t sxc654/docker-php:8.5 .
 cd alpine/3.24 && docker build -t sxc654/docker-alpine:3.24 .
+cd node/18 && docker build -t sxc654/docker-node:18 .
+cd node/22 && docker build -t sxc654/docker-node:22 .
+cd node/nvm && docker build -t sxc654/docker-node:nvm .
 ```
 
 ## 整理说明（历史）
