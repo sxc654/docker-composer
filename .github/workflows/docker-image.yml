@@ -16,6 +16,7 @@ jobs:
           - version: 18
           - version: 22
           - version: 24
+          - version: nvm
     steps:
       - name: Checkout
         uses: actions/checkout@v7
