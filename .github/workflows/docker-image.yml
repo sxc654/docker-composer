@@ -15,6 +15,7 @@ jobs:
         include:
           - version: 18
           - version: 22
+          - version: 24
     steps:
       - name: Checkout
         uses: actions/checkout@v7

@@ -1,4 +1,4 @@
-FROM node:22.23.1-slim
+FROM node:22-slim
 
 # Debian 系用 apt，不是 apk
 RUN apt-get update && apt-get install -y --no-install-recommends \
