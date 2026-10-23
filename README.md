@@ -1,17 +1,39 @@
 # docker-composer
 
-dockerhub 自动构建镜像仓库——docker-php 与 docker-alpine 两个镜像家族在此统一维护，新增版本/成员只需在对应目录下加子目录，无需再开新仓库。
+dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个子目录 = 一个镜像家族**，
+家族内**一个版本子目录 = 一个可独立构建的镜像**。新增镜像家族（或给现有家族加新版本）
+只需新建子目录 + 加一段 workflow job，不再开新仓库。
 
-## 目录
+## 约定
 
-| 子目录 | 内容 | Docker Hub tags |
+```text
+<家族名>/                 # 镜像家族（php / alpine / 后续新增…）
+├── README.md             # 家族级总览（版本表、构建方式）
+├── <版本1>/              # 一个版本 = 一个构建上下文（Dockerfile + README.md [+ vendor/patches 等依赖物]）
+└── <版本2>/
+```
+
+- 构建上下文即版本子目录本身，`docker build -t <tag> <版本子目录>` 从不依赖仓库内其他路径
+- Docker Hub tag：沿用各自家族原有命名（`sxc654/docker-php:*`、`sxc654/docker-alpine:*`…），
+  下游 `FROM` 不因仓库归拢而变动
+- CI：`.github/workflows/docker-image.yml` 内**每个版本一个 job**（buildx + GHA 缓存并行），
+  新增版本/家族时同步加 job；Docker Hub Secrets 复用 `DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`
+
+## 当前成员
+
+| 目录 | 内容 | Docker Hub tags |
 |---|---|---|
-| [`php/`](php/README.md) | PHP 基础镜像（alpine + fpm，中国时区，CVE 补丁），详见 [php/README.md](php/README.md) | `sxc654/docker-php:7.4` `:8.5` |
-| [`alpine/`](alpine/README.md) | GitLab CI 部署镜像（openssh-client + rsync + git + bash），详见 [alpine/README.md](alpine/README.md) | `sxc654/docker-alpine:3.24` |
+| [`php/`](php/README.md) | PHP 基础镜像（alpine + fpm，中国时区，CVE 补丁） | `docker-php:7.4` `:8.5` |
+| [`alpine/`](alpine/README.md) | GitLab CI 部署镜像（openssh-client + rsync + git + bash） | `docker-alpine:3.24` |
 
-## CI 构建
+*（此表随成员增减维护，新家族加一行即可）*
 
-推送到 `master` 后 GitHub Actions 自动构建三个镜像并推送 Docker Hub（`.github/workflows/docker-image.yml`，三 job 并行，GHA 缓存）。Docker Hub Secrets：`DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`。
+## 快速上手（新增一个镜像家族）
+
+1. 建子目录 `<家族名>/<版本>/Dockerfile`（可选 `README.md`、`vendor/` 等）
+2. 在 `docker-image.yml` 复制一份 job：改 context/file/tags 三行
+3. 根 README 本表和对应家族 README 加一行
+4. 构建期自检建议保留在 Dockerfile 里（缺扩展/缺工具/时区错即失败，参考现有家族写法）
 
 ## 本地构建
 
@@ -24,4 +46,4 @@ cd alpine/3.24 && docker build -t sxc654/docker-alpine:3.24 .
 ## 整理说明（历史）
 
 - `php/` 与 `alpine/` 分别由原仓库 `sxc654/docker-php`、`sxc654/docker-alpine` subtree 合并而来，完整提交历史保留在两个 merge commit 的 parent 链里
-- 2020 年的旧镜像（java/mongodb/wordpress/php7.1-7.2/gollum/timezone 等）已清理，如需回溯见 `<第一次清理提交>` 之前的提交
+- 2020 年的旧镜像（java/mongodb/wordpress/php7.1-7.2/gollum/timezone 等）已清理，如需回溯见旧清理提交之前的记录
