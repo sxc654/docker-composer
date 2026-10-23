@@ -52,5 +52,8 @@ cd node/nvm && docker build -t sxc654/docker-node:nvm .
 
 ## 整理说明（历史）
 
-- `php/` 与 `alpine/` 分别由原仓库 `sxc654/docker-php`、`sxc654/docker-alpine` subtree 合并而来，完整提交历史保留在两个 merge commit 的 parent 链里
+- `php/`、`alpine/`、`node/` 分别由原仓库 `sxc654/docker-php`、`sxc654/docker-alpine`、
+  `sxc654/docker-node` subtree 合并而来，完整提交历史保留在三个 merge commit 的 parent 链里；
+  子目录名随后对齐约定（node 家族与 `php/7.4` 同款平铺：`node/node-18`→`node/18` 等，
+  tag 推导无前缀剥离特例）
 - 2020 年的旧镜像（java/mongodb/wordpress/php7.1-7.2/gollum/timezone 等）已清理，如需回溯见旧清理提交之前的记录
