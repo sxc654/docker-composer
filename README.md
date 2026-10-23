@@ -4,7 +4,7 @@ Java 基础环境镜像：**一个版本子目录 = 一个镜像**，tag 推导�
 
 | 目录 | 基础镜像 | Docker Hub tag | 内容 |
 |---|---|---|---|
-| `openjdk-17/` | `alpine:3.17` | `sxc654/docker-java:openjdk17` | 完整 JDK17 + 字体（adobe-100dpi / ttf-dejavu / fontconfig）+ python3 / pip + git / make / curl / ssh 等构建工具 |
+| `openjdk-17/` | `alpine:3.22` | `sxc654/docker-java:openjdk17` | 完整 JDK17 + 字体（adobe-100dpi / ttf-dejavu / fontconfig）+ python3 / pip + git / make / curl / ssh 等构建工具 |
 | `openjdk-21/` | `alpine:3.22` | `sxc654/docker-java:openjdk21` | JDK21 **JRE 运行时**（openjdk21-jre-headless）+ 中文字体（wqy-zenhei）+ `TZ=Asia/Shanghai` / `zh_CN.UTF-8` |
 
 详细用法见各目录 README。

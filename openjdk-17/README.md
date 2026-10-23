@@ -1,6 +1,6 @@
 # docker-java:openjdk17
 
-完整 JDK17 基础镜像（`alpine:3.17`）：openjdk17 / jdk / jmods / demos / doc / jre，附字体（adobe-100dpi、ttf-dejavu、fontconfig）与构建工具链（python3 + pip、git、make、curl、openssh-client、supervisor），时区 `Asia/Shanghai`。可编译、可跑 maven。
+完整 JDK17 基础镜像（`alpine:3.22`）：openjdk17 / jdk / jmods / demos / doc / jre，附字体（adobe-100dpi、ttf-dejavu、fontconfig）与构建工具链（python3 + pip、git、make、curl、openssh-client、supervisor），时区 `Asia/Shanghai`、`JAVA_OPTS` 强制 UTF-8。可编译、可跑 maven。
 
 apk 源：`mirrors.nju.edu.cn`。
 
