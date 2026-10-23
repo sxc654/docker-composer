@@ -7,7 +7,7 @@ apk 源：`mirrors.nju.edu.cn`。
 ## 构建
 
 ```bash
-docker build -t sxc654/docker-java:openjdk17 openjdk-17
+docker build -t sxc654/docker-java:openjdk17 openjdk17
 ```
 
 ## 用法
