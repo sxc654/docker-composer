@@ -28,8 +28,7 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 |---|---|---|
 | [`php/`](php/README.md) | PHP 基础镜像（alpine + fpm，中国时区，CVE 补丁） | `docker-php:7.4` `:8.5` |
 | [`alpine/`](alpine/README.md) | GitLab CI 部署镜像（openssh-client + rsync + git + bash） | `docker-alpine:3.24` |
-| [`node/`](node/README.md) | node 基础环境（版本：18 alpine / 22 slim；变体：nvm 多版本切换） | `docker-node:18` `:22` `:nvm` |
-| [`npm/`](npm/README.md) | 部署工具镜像（变体：aliyun-cli = node 22 + 阿里云 CLI 3.5.2 + git/ssh/rsync） | `docker-npm:aliyun-cli` |
+| [`node/`](node/README.md) | node 基础环境（版本：18 alpine / 22 slim；变体：nvm 多版本切换、aliyun-cli 部署工具） | `docker-node:18` `:22` `:nvm` `:aliyun-cli` |
 
 *（此表随成员增减维护，新家族加一行即可）*
 
@@ -49,13 +48,14 @@ cd alpine/3.24 && docker build -t sxc654/docker-alpine:3.24 .
 cd node/18 && docker build -t sxc654/docker-node:18 .
 cd node/22 && docker build -t sxc654/docker-node:22 .
 cd node/nvm && docker build -t sxc654/docker-node:nvm .
-cd npm/aliyun-cli && docker build -t sxc654/docker-npm:aliyun-cli .
+cd node/aliyun-cli && docker build -t sxc654/docker-node:aliyun-cli .
 ```
 
 ## 整理说明（历史）
 
-- `php/`、`alpine/`、`node/`、`npm/` 分别由原仓库 `sxc654/docker-php`、`sxc654/docker-alpine`、
-  `sxc654/docker-node`、`sxc654/docker-npm` subtree 合并而来，完整提交历史保留在四个 merge
-  commit 的 parent 链里；子目录名随后对齐约定（node 家族与 `php/7.4` 同款平铺：
-  `node/node-18`→`node/18` 等，tag 推导无前缀剥离特例）
+- `php/`、`alpine/`、`node/` 分别由原仓库 `sxc654/docker-php`、`sxc654/docker-alpine`、
+  `sxc654/docker-node` subtree 合并而来，完整提交历史保留在 merge commit 的 parent 链里；
+  子目录名随后对齐约定（node 家族与 `php/7.4` 同款平铺：`node/node-18`→`node/18` 等，
+  tag 推导无前缀剥离特例）；`sxc654/docker-npm` 同月并入——原 `npm/` 家族当日归拢为
+  node 变体 `node/aliyun-cli/`，tag 随推断为 `docker-node:aliyun-cli`
 - 2020 年的旧镜像（java/mongodb/wordpress/php7.1-7.2/gollum/timezone 等）已清理，如需回溯见旧清理提交之前的记录

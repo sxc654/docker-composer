@@ -1,6 +1,6 @@
-﻿# docker-npm:aliyun-cli
+﻿# docker-node:aliyun-cli
 
-node 22 + 闃块噷浜?CLI 鐨勯儴缃?CI 闀滃儚锛坄sxc654/docker-npm:aliyun-cli`锛夈€?
+node 22 + 闃块噷浜?CLI 鐨勯儴缃?CI 闀滃儚锛坄sxc654/docker-node:aliyun-cli`锛夈€?
 
 ## 瀵规瘮鏃х増锛?.0.2 / node:10-alpine锛?
 
@@ -17,8 +17,8 @@ node 22 + 闃块噷浜?CLI 鐨勯儴缃?CI 闀滃儚锛坄sxc654/docker-npm:aliy
 ## 鏋勫缓
 
 ```sh
-cd npm/aliyun-cli
-docker build --build-arg ALIYUN_CLI_VERSION=3.5.2 --build-arg ALIYUN_CLI_SHA256=8058cb91fa0e2d46a7c5fd47e44ab6a465be8477b28595d408dcc03a0ed5bd4e -t sxc654/docker-npm:aliyun-cli .
+cd node/aliyun-cli
+docker build --build-arg ALIYUN_CLI_VERSION=3.5.2 --build-arg ALIYUN_CLI_SHA256=8058cb91fa0e2d46a7c5fd47e44ab6a465be8477b28595d408dcc03a0ed5bd4e -t sxc654/docker-node:aliyun-cli .
 ```
 
 鍗囩骇鐗堟湰锛氭敼涓婇潰涓や釜 ARG锛坰ha256 浠?[Release](https://github.com/aliyun/aliyun-cli/releases) 鐨?SHASUMS256.txt 鍙栵級銆?
@@ -32,5 +32,5 @@ docker build --build-arg ALIYUN_CLI_VERSION=3.5.2 --build-arg ALIYUN_CLI_SHA256=
 ## 楠岃瘉鍛戒护
 
 ```sh
-docker run --rm sxc654/docker-npm:aliyun-cli sh -c "aliyun version && node -v && git --version && rsync --version | head -1 && date +%Z"
+docker run --rm sxc654/docker-node:aliyun-cli sh -c "aliyun version && node -v && git --version && rsync --version | head -1 && date +%Z"
 ```

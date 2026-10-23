@@ -1,5 +1,5 @@
-# sxc654/docker-npm:aliyun-cli — node 22 部署镜像（git/ssh/rsync + 阿里云 CLI）
-# 基座：sxc654/docker-node:22（node 22 + git/curl/tzdata + Asia/Shanghai + deb 源已指 ustc）
+# sxc654/docker-node:aliyun-cli — node 22 部署镜像（git/ssh/rsync + 阿里云 CLI）
+# 基座：sxc654/docker-node:22（node 22 + git/curl + CA + tzdata + Asia/Shanghai + deb 源已指 ustc）
 FROM sxc654/docker-node:22
 
 # aliyun-cli 官方 Linux AMD64 包（阿里 CDN，与 GitHub Release 同源同校验）
