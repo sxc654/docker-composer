@@ -4,34 +4,39 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'node-22/**'
+  workflow_dispatch:
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: 18
+          - version: 22
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # 新增：设置 Docker Buildx，启用高级缓存和多架构支持能力
+      # 设置 Docker Buildx，启用高级缓存支持能力
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push node-22
-        uses: docker/build-push-action@v6
+      - name: Build and push node-${{ matrix.version }}
+        uses: docker/build-push-action@v7
         with:
-          context: ./node-22
-          file: ./node-22/Dockerfile # 显式指定 Dockerfile 的位置
+          context: ./node-${{ matrix.version }}
+          file: ./node-${{ matrix.version }}/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/docker-node:22
+            ${{ secrets.DOCKERHUB_USERNAME }}/docker-node:${{ matrix.version }}
           # 开启 GitHub Actions 的自带缓存，让后续的构建速度飞起来
           cache-from: type=gha
           cache-to: type=gha,mode=max
