@@ -1,6 +1,6 @@
 # docker-php 基础镜像 php-8.5
 #
-# 基于 php:8.5-fpm-alpine3.24（官方现值 8.5.12），扩展集与 basic/7.4 对齐
+# 基于 php:8.5-fpm-alpine3.24（官方现值 8.5.12），扩展集与 7.4 对齐
 # （xdebug + mongodb + amqp + imagick + soap/pdo_mysql/mysqli/mbstring/zip/
 #   bcmath/exif/intl/gd/pcntl）。
 # ini 配置沿用 7.4/8.x 系的 xdebug.mode / client_port 体系（端口 9005，避开 php-fpm 9000）。
@@ -25,7 +25,7 @@ RUN apk update \
 #******************vendor PIE（挂载使用，不进入镜像文件系统）******************
 # RUN --mount=type=bind 不产生镜像层（COPY 会因跨层 rm 仍占 9MB）；pie.phar 仅构建期存在
 
-# Install various PHP extensions（扩展集同 basic/7.4 + WordPress 常用扩展）
+# Install various PHP extensions（扩展集同 7.4 + WordPress 常用扩展）
 # 编译工具与 -dev 库放进 --virtual .build-deps（官方基础镜像不含工具链），编译完连同卸载
 RUN --mount=type=bind,source=vendor/pie.phar,target=/tmp/pie.phar,ro \
     apk update \

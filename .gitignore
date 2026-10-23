@@ -48,7 +48,7 @@ target/
 *.diff
 *.patch
 # docker-php 镜像安全补丁需随仓库提交（Dockerfile COPY 引用）
-!basic/7.4/patches/*.patch
+!php/7.4/patches/*.patch
 *.tmp
 *.java~
 *.properties~

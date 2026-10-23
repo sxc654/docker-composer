@@ -12,21 +12,17 @@ docker 下 PHP 基础镜像（alpine + fpm，中国时区 `Asia/Shanghai`，预�
 ## 目录结构
 
 ```text
-basic/
-├── 7.4/            # Dockerfile、README、CVE 补丁（patches/）、pie.phar 同款 vendor
+php/
+├── 7.4/            # Dockerfile、README、CVE 补丁（patches/）
 └── 8.5/            # Dockerfile、README、vendor/pie.phar（仅构建期挂载使用）
 ```
 
 ## 本地构建
 
 ```bash
-cd basic/7.4 && docker build -t sxc654/docker-php:7.4 .
-cd basic/8.5 && docker build -t sxc654/docker-php:8.5 .
+cd php/7.4 && docker build -t sxc654/docker-php:7.4 .
+cd php/8.5 && docker build -t sxc654/docker-php:8.5 .
 ```
-
-## CI 构建
-
-推送到 `master` 后 GitHub Actions 自动构建测试两个版本并推送 Docker Hub（见 `.github/workflows/docker-image.yml`）。
 
 ## 构建后快速验证
 

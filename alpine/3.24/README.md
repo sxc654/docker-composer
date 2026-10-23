@@ -18,15 +18,15 @@ ssh-agent 解锁私钥 → rsync 同步产物 → 重启远端服务这类部署
 
 ## 标签
 
-`sxc654/docker-alpine:3.24`（`.github/workflows/build-and-push.yml` 自动构建推送）；
+`sxc654/docker-alpine:3.24`（仓库根 `.github/workflows/docker-image.yml` 自动构建推送）；
 仓库需在 GitHub 上配置 Secrets：`DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`。
-出新版本（如 3.25）时：新建 `3.25/` 子目录 + workflow 里增加对应 job（如缓存容量吃紧，
+出新版本（如 alpine 3.25）时：新建 `3.25/` 子目录 + workflow 里增加对应 job（如缓存容量吃紧，
 可考虑移除 `cache-to` 或按 job 拆分）
 
 ## 构建
 
 ```bash
-cd 3.24
+cd alpine/3.24
 docker build -t sxc654/docker-alpine:3.24 .
 ```
 

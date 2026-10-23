@@ -1,12 +1,12 @@
 # docker-php php-8.5 基础镜像
 
-alpine 下的 php 8.5 fpm 基础环境（中国时区）。扩展集与 basic/7.4 同一套，镜像架构
+alpine 下的 php 8.5 fpm 基础环境（中国时区）。扩展集与 php/7.4 同一套，镜像架构
 （.build-deps 工具链卸载、pie.phar 挂载、时区 ini、构建期自检）同一套，扩展安装体系
 按 8.5 现状调整：PIE 替代 pecl，opcache 由 8.5 内建。
 
 - 基础：`php:8.5-fpm-alpine3.24`（官方镜像，浮动 tag，跟随官方 8.5.x 更新；现值 8.5.12）
 - 扩展安装：**PIE**（`php pie.phar install`，PHP 官方继任安装器；pecl 频道 REST 已弃用）
-  - `pie.phar`（PIE 1.5.3）vendor 在构建上下文 `basic/8.5/vendor/pie.phar`，
+  - `pie.phar`（PIE 1.5.3）vendor 在构建上下文 `php/8.5/vendor/pie.phar`，
     Dockerfile 以 `RUN --mount=type=bind,source=vendor/pie.phar` 取用，仅构建期存在
 - 第三方扩展（PIE，pin 版本，均兼容 8.5）：`xdebug 3.5.3`（php >=8.0,<8.6）、
   `mongodb 2.5.5`（>=8.1,<9）、`amqp 2.2.0`（>=7.4）、`imagick 3.8.1`（>=5.6）
