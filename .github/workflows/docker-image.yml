@@ -1,40 +1,107 @@
 name: Build and Push to DockerHub
 
-# 动态发现构建矩阵
+# 动态发现 + 按目录变更过滤
 # 约定：<家族名>/<版本名>/Dockerfile 即一个构建上下文，
 #       推送 tags 推导为 <DOCKERHUB_USERNAME>/docker-<家族名>:<版本名>。
-# 新增镜像家族/版本 = 建目录 + git push，workflow 零改动；
-# tag 不守约定或需多 tag 的特例，再引入 manifest 逃生门（当前未启用）。
+# 触发策略：
+#   - push master：只构建「本次 diff 命中的 <家族>/<版本>/」上下文；纯文档提交跳过构建
+#   - .github/workflows/** 自身变更：全量构建（验证 workflow）
+#   - workflow_dispatch：默认全量，可用 targets 输入指定（空格分隔的 family/version）
+#   - before 不可用（新分支/force-push）：全量
+# 新增镜像家族/版本 = 建目录 + git push，workflow 零改动。
 
 on:
   push:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      targets:
+        description: "指定构建目标（空格分隔的 family/version；留空 = 全量）"
+        required: false
+        default: ""
 
 jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.discover.outputs.matrix }}
+      matrix: ${{ steps.filter.outputs.matrix }}
+      has_work: ${{ steps.filter.outputs.has_work }}
     steps:
-      - name: Checkout
+      - name: Checkout（完整历史，用于 diff）
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
-      - name: Discover <家族>/<版本> 构建上下文
-        id: discover
+      - name: 发现 <家族>/<版本> 上下文并按变更过滤
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          TARGETS: ${{ inputs.targets }}
         run: |
-          entries=$(find . -mindepth 3 -maxdepth 3 -name Dockerfile \
-            | sed 's|^\./||; s|/Dockerfile$||' \
-            | jq -Rnc '[inputs | split("/") | {family: .[0], version: .[1]}]')
-          echo "entries=$entries"
-          if [ -z "$entries" -o "$entries" = "[]" ]; then
+          set -euo pipefail
+
+          # 1) 全量上下文
+          all=$(find . -mindepth 3 -maxdepth 3 -name Dockerfile \
+                | sed 's|^\./||; s|/Dockerfile$||' | sort)
+          if [ -z "$all" ]; then
             echo "::error::no <family>/<version>/Dockerfile found"; exit 1
           fi
-          echo "matrix=$(jq -nc --argjson e "$entries" '{include: $e}')" >> $GITHUB_OUTPUT
+          echo "全部上下文 ($(printf '%s\n' "$all" | wc -l) 个):"
+          printf '%s\n' "$all"
+
+          # 2) 变更文件列表（决定全量还是过滤）
+          changed=""
+          reason=""
+          if [ -n "${TARGETS:-}" ]; then
+            reason="manual-targets"
+          elif [ "$EVENT" = "workflow_dispatch" ]; then
+            reason="manual-all"
+            changed="*"
+          elif [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            reason="new-branch-or-force-push"
+            changed="*"
+          else
+            changed=$(git diff --name-only "$BEFORE" "$SHA")
+            reason="diff ${BEFORE:0:7}..${SHA:0:7}"
+          fi
+          echo "判定依据: $reason"
+
+          # 3) 过滤
+          note=""
+          if [ -n "${TARGETS:-}" ]; then
+            selected=$(printf '%s\n' $TARGETS | while read -r t; do
+              printf '%s\n' "$all" | grep -x "$t" || true
+            done | sort -u)
+            note="手动指定: $TARGETS"
+          elif [ "$changed" = "*" ] || printf '%s\n' "$changed" | grep -q '^\.github/workflows/'; then
+            selected="$all"
+            note="全量构建（$reason）"
+          else
+            selected=$(printf '%s\n' "$all" | while read -r ctx; do
+              if printf '%s\n' "$changed" | grep -q "^${ctx}/"; then echo "$ctx"; fi
+            done | sort -u)
+            note="按目录变更过滤"
+          fi
+
+          # 4) 输出
+          if [ -z "${selected:-}" ]; then
+            echo "::notice::$note —— 没有镜像目录变更，跳过构建"
+            echo "has_work=false" >> "$GITHUB_OUTPUT"
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$note —— 选中 $(printf '%s\n' "$selected" | wc -l) 个"
+            entries=$(printf '%s\n' "$selected" | jq -Rnc '[inputs | split("/") | {family: .[0], version: .[1]}]')
+            echo "matrix=$(jq -nc --argjson e "$entries" '{include: $e}')" >> "$GITHUB_OUTPUT"
+            echo "has_work=true" >> "$GITHUB_OUTPUT"
+          fi
 
   build:
     needs: setup
+    if: needs.setup.outputs.has_work == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -61,6 +128,6 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/docker-${{ matrix.family }}:${{ matrix.version }}
-          # 开启 GitHub Actions 的自带缓存，让后续的构建速度飞起来
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # 每个镜像独立缓存 scope，避免 9 个上下文共用默认 scope 互相污染
+          cache-from: type=gha,scope=${{ matrix.family }}-${{ matrix.version }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.family }}-${{ matrix.version }}

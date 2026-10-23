@@ -18,7 +18,10 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
   alpine→`docker-alpine:3.24`，node→`docker-node:18` / `:22` / `:nvm`），
   下游 `FROM` 不因仓库归拢而变动
 - CI：`.github/workflows/docker-image.yml` **setup job 自动扫描**所有 `<家族>/<版本>/Dockerfile`
-  生成构建矩阵，每版本一个并行 job（buildx + GHA 缓存）——**新增家族/版本 workflow 零改动**；
+  生成构建矩阵，每版本一个并行 job（buildx + 每镜像独立 GHA 缓存 scope）——**新增家族/版本 workflow 零改动**；
+  **按目录变更过滤**：push master 只构建本次 diff 命中的 `<家族>/<版本>/`（纯文档提交 0 job），
+  `.github/workflows/**` 自身变更、force-push/新分支时全量；`workflow_dispatch` 默认全量，
+  可用 `targets` 输入指定（空格分隔的 `family/version`）；
   Docker Hub Secrets 复用 `DOCKERHUB_USERNAME` + `DOCKERHUB_TOKEN`
   （tag 规则即上述约定；不守约定或多 tag 特例时再考虑引入 manifest 逃生门）
 
