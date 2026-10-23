@@ -39,7 +39,7 @@ RUN bash -c 'set -e; \
     node -v; npm -v; \
     npm config set registry https://registry.npmmirror.com; \
     npm install -g pnpm@latest; \
-    rm -rf "$NVM_DIR/.cache"'
+    rm -rf "$NVM_DIR/.cache" /root/.npm /tmp/node-compile-cache /tmp/*'
 
 # /root/.nvm/current 由 NVM_SYMLINK_CURRENT 维护（nvm use 时同步翻新），非交互进程靠它访问 node/npm
 ENV PATH="/root/.nvm/current/bin:${PATH}"
