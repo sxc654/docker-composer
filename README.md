@@ -22,7 +22,7 @@ node-<变体名>/        # 同构变体（如 nvm 多版本切换镜像）：非
 | 目录 | 基础镜像 | Docker Hub tag | 内容 |
 |---|---|---|---|
 | [`node-18/`](node-18/README.md) | `node:18-alpine3.19`（alpine 系，2024 起未更新） | `sxc654/docker-node:18` | apk 换 ustc 源 + 开发工具链：vim/git/g++/make/rsync/curl/autoconf/python3/openssh-client + tzdata → Asia/Shanghai |
-| [`node-22/`](node-22/README.md) | `node:22-slim`（Debian 系，浮动 tag） | `sxc654/docker-node:22` | apt 装 git/g++/make/autoconf/python3/curl + canvas 依赖链（libcairo2/libpango/libjpeg/libgif/librsvg dev）+ 全局 `pnpm` |
+| [`node-22/`](node-22/README.md) | `node:22-slim`（Debian 系，浮动 tag） | `sxc654/docker-node:22` | git/curl + canvas **运行时**库（libcairo2/libpango-1.0-0/libjpeg62-turbo/libgif7/librsvg2-2，prebuilt canvas 免编译）+ npmmirror + 全局 `pnpm` |
 | [`node-nvm/`](node-nvm/README.md) | `debian:trixie-slim` + nvm v0.40.3 | `sxc654/docker-node:nvm` | 多版本运行时切换（预装 node 24+22，默认 24，npmmirror 下载，git/pnpm 基线） |
 
 ## 快速上手（新增一个版本）
