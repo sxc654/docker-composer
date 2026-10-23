@@ -1,16 +1,15 @@
-# docker-php 基础镜像 php-8.4
+# docker-php 基础镜像 php-8.5
 #
-# 基于 php:8.4-fpm-alpine3.24，扩展集与 basic/7.4 保持一致
+# 基于 php:8.5-fpm-alpine3.24（官方现值 8.5.12），扩展集与 basic/7.4 对齐
 # （xdebug + mongodb + amqp + imagick + soap/pdo_mysql/mysqli/mbstring/zip/
-#   bcmath/exif/intl/gd/pcntl/opcache）。
-# PHP 8.x 的 xdebug 必须用 3.x（7.4 用的 2.8.0 不支持 8.x），ini 配置也随之换成
-# xdebug.mode / client_port 体系（端口沿用 8.2 旧镜像的 9005，避开 php-fpm 9000）。
+#   bcmath/exif/intl/gd/pcntl）。
+# ini 配置沿用 7.4/8.x 系的 xdebug.mode / client_port 体系（端口 9005，避开 php-fpm 9000）。
 #
-# 扩展安装改用 PIE（PHP Installer for Extensions）——PECL 频道 REST 已弃用，
+# 扩展安装沿用 PIE（PHP Installer for Extensions）——PECL 频道 REST 已弃用，
 # PIE 是 PHP 官方继任安装器，从 packagist 解析版本。
 # pie.phar 取自 PIE 1.5.3 稳定版发布物，vendor 在构建上下文 vendor/pie.phar。
 
-FROM php:8.4-fpm-alpine3.24
+FROM php:8.5-fpm-alpine3.24
 
 #******************更换Alpine源为mirrors.ustc.edu.cn******************
 RUN echo http://mirrors.ustc.edu.cn/alpine/v3.24/main > /etc/apk/repositories \
@@ -26,7 +25,7 @@ RUN apk update \
 #******************vendor PIE（挂载使用，不进入镜像文件系统）******************
 # RUN --mount=type=bind 不产生镜像层（COPY 会因跨层 rm 仍占 9MB）；pie.phar 仅构建期存在
 
-# Install various PHP extensions（扩展集同 php-7.4 + WordPress 常用扩展）
+# Install various PHP extensions（扩展集同 basic/7.4 + WordPress 常用扩展）
 # 编译工具与 -dev 库放进 --virtual .build-deps（官方基础镜像不含工具链），编译完连同卸载
 RUN --mount=type=bind,source=vendor/pie.phar,target=/tmp/pie.phar,ro \
     apk update \
@@ -58,11 +57,11 @@ RUN --mount=type=bind,source=vendor/pie.phar,target=/tmp/pie.phar,ro \
     && docker-php-ext-install gd \
     && docker-php-ext-configure pcntl --enable-pcntl \
     && docker-php-ext-install pcntl \
-    && docker-php-ext-install opcache \
-    && docker-php-ext-enable opcache \
+    # PHP 8.5 起 OPcache 内建并默认启用（php -m 直出 Zend OPcache），无需且不能显式 install：
     && apk del .build-deps
 
 # 构建期自检：PIE 启用扩展是 best-effort（启用失败只 warn 不中断构建），故在此逐项断言；
+# 缺扩展 / xdebug 配置未生效 / 时区不是 Asia/Shanghai 时，任一项失败即中断构建
 RUN php -r '$required = ["xdebug","mongodb","amqp","imagick","soap","pdo_mysql","mysqli","mbstring","zip","bcmath","exif","intl","gd","pcntl","Zend OPcache"]; \
     $missing = []; \
     foreach ($required as $m) { if (!extension_loaded($m)) { $missing[] = $m; } } \

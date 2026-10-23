@@ -36,8 +36,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # php-8.4 基础镜像（官方版本自身不受 CVE-2026-109618/109619 影响）
-  build-and-push-php-84:
+  # php-8.5 基础镜像（官方版本自身不受 CVE-2026-109618/109619 影响）
+  build-and-push-php-85:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -52,13 +52,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push php-8.4
+      - name: Build and push php-8.5
         uses: docker/build-push-action@v7
         with:
-          context: ./basic/8.4
-          file: ./basic/8.4/Dockerfile
+          context: ./basic/8.5
+          file: ./basic/8.5/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:8.4
+            ${{ secrets.DOCKERHUB_USERNAME }}/docker-php:8.5
           cache-from: type=gha
           cache-to: type=gha,mode=max
