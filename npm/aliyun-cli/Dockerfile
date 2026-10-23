@@ -8,7 +8,7 @@ ARG ALIYUN_CLI_VERSION=3.5.2
 ARG ALIYUN_CLI_SHA256=8058cb91fa0e2d46a7c5fd47e44ab6a465be8477b28595d408dcc03a0ed5bd4e
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates openssh-client rsync \
+    && apt-get install -y --no-install-recommends openssh-client rsync \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL -o /tmp/aliyun-cli.tgz "https://aliyuncli.alicdn.com/aliyun-cli-linux-${ALIYUN_CLI_VERSION}-amd64.tgz" \
