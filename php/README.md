@@ -14,7 +14,9 @@ docker 下 PHP 基础镜像（alpine + fpm，中国时区 `Asia/Shanghai`，预�
 ```text
 php/
 ├── 7.4/            # Dockerfile、README、CVE 补丁（patches/）
-└── 8.5/            # Dockerfile、README、vendor/pie.phar（仅构建期挂载使用）
+├── 8.5/            # Dockerfile、README、vendor/pie.phar（仅构建期挂载使用）
+└── wxwork/         # 企业微信会话存档扩展物料（wxwork_finance_sdk/ 上游原样拷贝）
+                    # 本地构建特例：Dockerfile.local，不进 CI / 不推 Hub（见 wxwork/README.md）
 ```
 
 ## 本地构建
@@ -22,7 +24,13 @@ php/
 ```bash
 cd php/7.4 && docker build -t sxc654/docker-php:7.4 .
 cd php/8.5 && docker build -t sxc654/docker-php:8.5 .
+cd php && docker build -t sxc654/docker-php:7.4-wxwork-finance-sdk \
+      -f wxwork/Dockerfile.local wxwork
 ```
+
+> `wxwork/` 是企业微信会话存档扩展（应用特设，非基础环境镜像）；构建文件命名刻意避开
+> CI 的 Dockerfile 发现规则，仅本地构建 `docker-php:7.4-wxwork-finance-sdk`，
+> 细节见 [wxwork/README.md](wxwork/README.md)。
 
 ## 构建后快速验证
 

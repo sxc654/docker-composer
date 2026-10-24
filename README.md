@@ -69,9 +69,10 @@ cd java/openjdk21 && docker build -t sxc654/docker-java:openjdk21 .
   目录 `openjdk-17`/`openjdk-21` 平铺为 `openjdk17`/`openjdk21`；tag 沿用 Hub 已发布的
   `docker-java:openjdk17`/`:openjdk21`（不改成 `17`/`21`，避免旧 tag 孤儿化、下游 FROM 断裂）；
   并入前同月已淘汰 Java 8 全家族（openjdk8 / openjdk8-font / openjre8 / maven）
-- `wxwork/` 2026-10 新增：企业微信会话存档扩展（应用特设能力，非基础环境家族）——
-  `wxwork/wxwork_finance_sdk/` 为 `pangdahua/php7-wxwork-finance-sdk` 整体拷贝
-  （扩展源码 + C SDK v1.0~v2.0 二进制，内容保持上游原样），顶层 `wxwork/Dockerfile`
-  本地构建 `docker-php:7.4-wxwork-finance-sdk`（基座 php:7.4 + 扩展对接 SDK v2.0）。
-  **不进 CI、不推 Hub**：Dockerfile 位于第 2 层，不在 `find -mindepth 3` 扫描范围，
-  SDK 目录也不落在任何 `<家族>/<版本>/` 前缀内（见 wxwork/README.md）
+- `php/wxwork/` 2026-10 新增：企业微信会话存档扩展（应用特设能力，不随家族 CI 构建）——
+  `wxwork_finance_sdk/` 为 `pangdahua/php7-wxwork-finance-sdk` 整体拷贝（扩展源码 +
+  C SDK v1.0~v2.0 二进制，内容保持上游原样）；本地经 `php/wxwork/Dockerfile.local`
+  构建 `docker-php:7.4-wxwork-finance-sdk`（基座 php:7.4 + 扩展对接 SDK v2.0）。
+  **不进 CI、不推 Hub**：构建文件刻意命名为 Dockerfile.local，避开
+  `find -name Dockerfile` 发现规则（若叫 Dockerfile 会被当作 docker-php:wxwork 推送；
+  见 php/wxwork/README.md）

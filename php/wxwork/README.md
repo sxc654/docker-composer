@@ -1,15 +1,14 @@
-# wxwork —— 企业微信会话存档扩展（应用特设，非基础环境家族）
+# wxwork —— 企业微信会话存档扩展（php 家族下的本地构建特例）
 
-`wxwork_finance_sdk` = 企业微信会话存档 PHP 扩展 + 各代 C SDK 二进制。本目录是它在
-docker-composer 仓库中的存放与本地构建位，**独立于 php 等家族的 CI 构建**——
-不推 Docker Hub，需要时本地构建部署即可（会话存档为企业微信特设能力，只对
-需要此能力的运行环境叠加）。
+`wxwork_finance_sdk` = 企业微信会话存档 PHP 扩展 + 各代 C SDK 二进制，归在 php 家族目录下
+维护，但**独立于 php 家族的 CI 构建**——不推 Docker Hub，需要时本地构建部署即可
+（会话存档为企业微信特设能力，只对需要此能力的运行环境叠加）。
 
 ## 目录
 
 ```text
-wxwork/
-├── Dockerfile             # 构建文件 → 产物 sxc654/docker-php:7.4-wxwork-finance-sdk
+php/wxwork/
+├── Dockerfile.local       # 构建文件 → 产物 sxc654/docker-php:7.4-wxwork-finance-sdk
 │                          #   （基座 sxc654/docker-php:7.4 + wxwork_finance_sdk.so 对接 SDK v2.0）
 ├── README.md              # 本文件
 └── wxwork_finance_sdk/    # pangdahua/php7-wxwork-finance-sdk 整体拷贝，内容保持上游原样
@@ -20,18 +19,21 @@ wxwork/
 
 ## 为什么 CI 不会碰它
 
-CI（`.github/workflows/docker-image.yml`）对家族/版本的发现规则是
-`find . -mindepth 3 -maxdepth 3 -name Dockerfile`：
+CI（`.github/workflows/docker-image.yml`）的发现规则是**路径深度恰为 3 且文件名为
+`Dockerfile`**：`find . -mindepth 3 -maxdepth 3 -name Dockerfile`。
 
-- 本 `wxwork/Dockerfile` 位于第 2 层，扫描不到；
-- `wxwork/wxwork_finance_sdk/` 下没有 Dockerfile，也不落在任何 `<家族>/<版本>/` 前缀内。
+- 本目录位于深度 3（`php/wxwork/`），若构建文件叫 `Dockerfile`，CI 会把它当成
+  php 家族的 `wxwork` 版本，构建并推送 `docker-php:wxwork`；
+- 因此构建文件刻意命名 **`Dockerfile.local`**，不命中发现规则；
+- `wxwork_finance_sdk/` 下也没有（且不得新增）名为 `Dockerfile` 的文件。
 
-所以本目录的提交（含文档/SDK 更新）对 CI 全程无感，永远不会构建或推送。
+结论：本目录的任何提交（文档/SDK 更新）对 CI 视同纯文档提交，不构建、不产生任何 Hub tag。
 
 ## 本地构建（仓库根执行）
 
 ```bash
-docker build -t sxc654/docker-php:7.4-wxwork-finance-sdk wxwork
+docker build -t sxc654/docker-php:7.4-wxwork-finance-sdk \
+  -f php/wxwork/Dockerfile.local php/wxwork
 ```
 
 > 前提：基座 `sxc654/docker-php:7.4` 为 2026-10-24 之后的版本（apk 源已切 aliyun，
@@ -48,7 +50,7 @@ docker run --rm sxc654/docker-php:7.4-wxwork-finance-sdk php -r 'var_dump(class_
 
 ## 换基座 / 换 SDK 版本
 
-改 `wxwork/Dockerfile` 中两处即可：
+改 `php/wxwork/Dockerfile.local` 中两处即可：
 
 1. `FROM sxc654/docker-php:<新基座>`
 2. `--with-wxwork-finance-sdk=<SDK 版本目录>`（`v1.0`/`v1.1`/`v1.2`/`v2.0`，目录需同时含
