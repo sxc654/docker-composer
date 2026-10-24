@@ -21,9 +21,11 @@
 
 FROM php:7.4-fpm-alpine3.16
 
-#******************更换Alpine源为mirrors.ustc.edu.cn******************
-RUN echo http://mirrors.ustc.edu.cn/alpine/v3.16/main > /etc/apk/repositories \
-    && echo http://mirrors.ustc.edu.cn/alpine/v3.16/community >> /etc/apk/repositories
+#******************更换Alpine源为mirrors.aliyun.com（2026-10-24，自 ustc 迁移）******************
+# 原因：本机 BuildKit 构建网络对 ustc 会出现 403/索引不全（docker run 同源直测却正常）；
+# 切统一 aliyun http 源后，CI 构建、本地构建与 wxwork 本地构建（源随基座）行为一致
+RUN echo http://mirrors.aliyun.com/alpine/v3.16/main > /etc/apk/repositories \
+    && echo http://mirrors.aliyun.com/alpine/v3.16/community >> /etc/apk/repositories
 
 # localtime（系统时区 + PHP 侧 date.timezone；PHP 不读 /etc/localtime，必须显式设置 ini）
 RUN apk update \
