@@ -33,6 +33,7 @@ dockerhub 自动构建镜像仓库——多镜像家族统一维护：**一个�
 | [`alpine/`](alpine/README.md) | GitLab CI 部署镜像（openssh-client + rsync + git + bash） | `docker-alpine:3.24` |
 | [`node/`](node/README.md) | node 基础环境（版本：18 alpine / 22 slim；变体：nvm 多版本切换、aliyun-cli 部署工具） | `docker-node:18` `:22` `:nvm` `:aliyun-cli` |
 | [`java/`](java/README.md) | Java 基础环境（openjdk17 完整 JDK 开发基座 / openjdk21 JRE 运行基座，alpine 3.22，中文字体 + UTF-8） | `docker-java:openjdk17` `:openjdk21` |
+| [`python/`](python/README.md) | Python 基础环境（3.11 构建基座：编译链 + mysqlclient/ldap/pyodbc 头文件 + 国内源） | `docker-python:3.11` |
 
 *（此表随成员增减维护，新家族加一行即可）*
 
@@ -55,6 +56,7 @@ cd node/nvm && docker build -t sxc654/docker-node:nvm .
 cd node/aliyun-cli && docker build -t sxc654/docker-node:aliyun-cli .
 cd java/openjdk17 && docker build -t sxc654/docker-java:openjdk17 .
 cd java/openjdk21 && docker build -t sxc654/docker-java:openjdk21 .
+cd python/3.11 && docker build -t sxc654/docker-python:3.11 .
 ```
 
 ## 整理说明（历史）
