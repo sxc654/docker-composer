@@ -47,7 +47,7 @@ Dockerfile 末尾断言：解释器为 `Python 3.11.*`、`gcc`/`g++`/`make` 可�
 
 ## 体积
 
-≈ 1.05 GB（未压缩，含 build-essential 与 Python 全量镜像）；压缩约 330 MB。
+≈ 1.46 GB（未压缩，含 build-essential 与 Python 全量镜像）；压缩 ≈384 MB（Hub 实测）。
 应用层可在装完依赖后 `apt-get purge -y build-essential && apt-get autoremove -y` 收敛
 （`docker-archery` 就是这么做的）。
 
